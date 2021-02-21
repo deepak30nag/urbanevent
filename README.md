@@ -6,6 +6,7 @@ Mainly divided into two services:
 
 Cross cutting concerns
 1. server registry and discovery
+2. Api Gateway
 
 PORT configuration
 1. order service => 8100 onwards

@@ -10,10 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.urbanslap.userservice.dto.eventservice.ServiceEntityDto;
+import com.urbanslap.userservice.dto.orderService.OrderEventEntityDto;
 import com.urbanslap.userservice.messagewrapper.NetworkExchangeMessageWrapper;
 import com.urbanslap.userservice.usereventresource.facades.UserEventResourceFacade;
 
@@ -33,5 +36,13 @@ public class UserEventResource {
 			@PathVariable(value = "userId") String userId) {
 		NetworkExchangeMessageWrapper<List<ServiceEntityDto>> payload = userEventResourceFacade.serviceEntity();
 		return new ResponseEntity<NetworkExchangeMessageWrapper<List<ServiceEntityDto>>>(payload, HttpStatus.OK);
+	}
+
+	@PostMapping("/{userId}/requestForService")
+	public ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntityDto>> placeRequestForService(
+			@RequestBody OrderEventEntityDto entitydto, @PathVariable(value = "userId") String userId) {
+		entitydto.setOrderBy(userId);
+		NetworkExchangeMessageWrapper<OrderEventEntityDto> payload = userEventResourceFacade.createOrder(entitydto);
+		return new ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntityDto>>(payload, HttpStatus.OK);
 	}
 }

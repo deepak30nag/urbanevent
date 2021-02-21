@@ -3,14 +3,21 @@
  */
 package com.urbanslap.orderservice.facade;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import com.urbanslap.orderservice.dao.OrderDao;
 import com.urbanslap.orderservice.entity.OrderEventEntity;
+import com.urbanslap.orderservice.entity.userrole.dto.UserRoles;
 import com.urbanslap.orderservice.messagewrapper.NetworkExchangeMessageWrapper;
 
 /**
@@ -22,6 +29,12 @@ public class OrderEventFacadeImpl implements OrderEventFacade {
 
 	@Autowired
 	OrderDao orderDao;
+
+	@Autowired
+	RestTemplate restTemplate;
+
+	@Autowired
+	LoadBalancerClient loadBalancerClient;
 
 	@Override
 	public NetworkExchangeMessageWrapper<List<OrderEventEntity>> getAllOrderForUserId(String userId) {
@@ -67,6 +80,30 @@ public class OrderEventFacadeImpl implements OrderEventFacade {
 		return messageWrapper;
 	}
 
+	private String getCurrentlyWith() {
+		String baseUrl = initializer("user-service");
+		String url = baseUrl + "/api/user-service/findByName/role/{roleName}";
+		Map<String, Object> uriVariables = new HashMap<>();
+		uriVariables.put("roleName", "admin");
+		NetworkExchangeMessageWrapper<UserRoles> roles = null;
+		try {
+			ResponseEntity<NetworkExchangeMessageWrapper> responseEntity = restTemplate.getForEntity(url,
+					NetworkExchangeMessageWrapper.class, uriVariables);
+			roles = responseEntity.getBody();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (Objects.nonNull(roles) && Objects.nonNull(roles.getPayload())) {
+			return roles.getPayload().getId();
+		}
+		return "001";
+	}
+
+	private String initializer(String applicationName) {
+		ServiceInstance instance = loadBalancerClient.choose(applicationName);
+		return instance.getUri().toString();
+	}
+
 	@Override
 	public NetworkExchangeMessageWrapper<OrderEventEntity> createNewOrderEntry(OrderEventEntity data) {
 		NetworkExchangeMessageWrapper<OrderEventEntity> messageWrapper = new NetworkExchangeMessageWrapper<OrderEventEntity>();
@@ -76,6 +113,7 @@ public class OrderEventFacadeImpl implements OrderEventFacade {
 			messageWrapper.setPayload(null);
 			return messageWrapper;
 		}
+		data.setCurrentlyWith(getCurrentlyWith());
 		final OrderEventEntity orderEntity = orderDao.createNewOrderEntry(data);
 		if (Objects.nonNull(orderEntity)) {
 			messageWrapper.setMessage("Order created: ");
