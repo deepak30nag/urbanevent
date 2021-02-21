@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.urbanslap.eventservice.entity.ServiceProviderEntity;
@@ -21,12 +22,13 @@ import com.urbanslap.eventservice.serviceproviderfacade.ServiceProviderFacade;
  *
  */
 @RestController
+@RequestMapping("/api/event-service")
 public class ServiceProviderRelationResource {
 
 	@Autowired
 	ServiceProviderFacade serviceProviderFacade;
 	
-	@GetMapping("/api/getAllServicesProvidedByProviders")
+	@GetMapping("/getAllServicesProvidedByProviders")
 	public ResponseEntity<NetworkExchangeMessageWrapper<List<ServiceProviderEntity>>> getAllAvailableServiceProviderRelations(){
 		NetworkExchangeMessageWrapper<List<ServiceProviderEntity>> messageWrapper = serviceProviderFacade.getAllServiceProviderRelations();
 		if(Objects.nonNull(messageWrapper.getPayload())) {

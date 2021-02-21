@@ -69,8 +69,8 @@ public class OrderDaoImpl implements OrderDao {
 		return data;
 	}
 
-	public OrderEventEntity updateOrderEntry(OrderEventEntity data) {
-		if (orderTransactions.containsKey(data.getOrderid())) {
+	public OrderEventEntity updateOrderEntry(OrderEventEntity data,String orderId) {
+		if(orderTransactions.containsKey(orderId)) {
 			data.setLastupdatedAt(new Date());
 			orderTransactions.put(data.getOrderid(), data);
 			return data;

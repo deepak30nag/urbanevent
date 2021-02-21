@@ -12,3 +12,4 @@ PORT configuration
 2. event service => 8200 onwards
 3. user service => 8080 onwards
 4. server registry => 8761
+5. api gateway => 8765

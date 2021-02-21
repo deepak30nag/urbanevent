@@ -11,5 +11,5 @@ public interface OrderDao {
 
 	OrderEventEntity createNewOrderEntry(OrderEventEntity data);
 
-	OrderEventEntity updateOrderEntry(OrderEventEntity data);
+	OrderEventEntity updateOrderEntry(OrderEventEntity data, String orderId);
 }

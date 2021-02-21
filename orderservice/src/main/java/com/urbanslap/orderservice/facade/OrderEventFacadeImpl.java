@@ -90,7 +90,7 @@ public class OrderEventFacadeImpl implements OrderEventFacade {
 	}
 
 	@Override
-	public NetworkExchangeMessageWrapper<OrderEventEntity> updateOrderEntry(OrderEventEntity data) {
+	public NetworkExchangeMessageWrapper<OrderEventEntity> updateOrderEntry(OrderEventEntity data, String orderId) {
 		NetworkExchangeMessageWrapper<OrderEventEntity> messageWrapper = new NetworkExchangeMessageWrapper<OrderEventEntity>();
 		if (Objects.isNull(data)) {
 			messageWrapper.setMessage("Please provide values for order event correctly");
@@ -98,7 +98,7 @@ public class OrderEventFacadeImpl implements OrderEventFacade {
 			messageWrapper.setPayload(null);
 			return messageWrapper;
 		}
-		final OrderEventEntity orderEntity = orderDao.updateOrderEntry(data);
+		final OrderEventEntity orderEntity = orderDao.updateOrderEntry(data, orderId);
 		if (Objects.nonNull(orderEntity)) {
 			messageWrapper.setMessage("Order created: ");
 			messageWrapper.setStatus(2);

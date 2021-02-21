@@ -26,7 +26,7 @@ public class UserRolesFacadeImpl implements UserRolesFacade {
 
 	@Override
 	public NetworkExchangeMessageWrapper<UserRoles> findById(String id) {
-		NetworkExchangeMessageWrapper<UserRoles> roleMessageWrapper = null;
+		NetworkExchangeMessageWrapper<UserRoles> roleMessageWrapper = new NetworkExchangeMessageWrapper<UserRoles>();
 		final UserRoles role = userRolesServiceDao.findById(id);
 		if (Objects.nonNull(role)) {
 			roleMessageWrapper.setStatus(0);
@@ -42,7 +42,7 @@ public class UserRolesFacadeImpl implements UserRolesFacade {
 
 	@Override
 	public NetworkExchangeMessageWrapper<UserRoles> findByRoleName(String role_name) {
-		NetworkExchangeMessageWrapper<UserRoles> roleMessageWrapper = null;
+		NetworkExchangeMessageWrapper<UserRoles> roleMessageWrapper = new NetworkExchangeMessageWrapper<UserRoles>();
 		final UserRoles role = userRolesServiceDao.findByRoleName(role_name);
 		if (Objects.nonNull(role)) {
 			roleMessageWrapper.setStatus(2);
@@ -58,7 +58,7 @@ public class UserRolesFacadeImpl implements UserRolesFacade {
 
 	@Override
 	public NetworkExchangeMessageWrapper<List<UserRoles>> getAllUserRoles() {
-		NetworkExchangeMessageWrapper<List<UserRoles>> roleMessageWrapper = null;
+		NetworkExchangeMessageWrapper<List<UserRoles>> roleMessageWrapper = new NetworkExchangeMessageWrapper<List<UserRoles>>();
 		List<UserRoles> rolesList = userRolesServiceDao.getAllUserRoles();
 		if (Objects.nonNull(rolesList) && rolesList.size() > 0) {
 			roleMessageWrapper.setStatus(4);

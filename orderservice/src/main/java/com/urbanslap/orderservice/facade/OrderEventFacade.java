@@ -7,7 +7,7 @@ import com.urbanslap.orderservice.messagewrapper.NetworkExchangeMessageWrapper;
 
 public interface OrderEventFacade {
 
-	NetworkExchangeMessageWrapper<OrderEventEntity> updateOrderEntry(OrderEventEntity data);
+	NetworkExchangeMessageWrapper<OrderEventEntity> updateOrderEntry(OrderEventEntity data, String orderId);
 
 	NetworkExchangeMessageWrapper<OrderEventEntity> createNewOrderEntry(OrderEventEntity data);
 
