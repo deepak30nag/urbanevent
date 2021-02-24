@@ -29,9 +29,20 @@ public class ServiceDaoImpl implements ServiceDao {
 		servicesDao.put("005", new ServiceEntity("005", "Weddings"));
 	}
 
+	@Override
 	public List<ServiceEntity> getAllAvailableService() {
 		return Objects.nonNull(servicesDao) && servicesDao.size() > 0
 				? servicesDao.values().stream().collect(Collectors.toList())
 				: null;
+	}
+	
+	@Override
+	public ServiceEntity getById(String id) {
+		if(Objects.nonNull(servicesDao) && servicesDao.size()>0) {
+			if(servicesDao.containsKey(id)) {
+				return servicesDao.get(id);
+			}
+		}
+		return null;
 	}
 }

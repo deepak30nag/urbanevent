@@ -9,4 +9,9 @@ public interface ServiceProviderFacade {
 
 	NetworkExchangeMessageWrapper<List<ServiceProviderEntity>> getAllServiceProviderRelations();
 
+	NetworkExchangeMessageWrapper<List<ServiceProviderEntity>> getServiceProviderRelationsByLocation(String locationId);
+
+	NetworkExchangeMessageWrapper<List<ServiceProviderEntity>> getServiceProviderRelationsByLocationAndServiceId(
+			String locationId, String serviceId);
+
 }

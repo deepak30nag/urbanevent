@@ -7,4 +7,8 @@ import com.urbanslap.eventservice.messagewrapper.NetworkExchangeMessageWrapper;
 
 public interface ServiceFacades {
 	NetworkExchangeMessageWrapper<List<ServiceEntity>> getAllAvailableServices();
+
+	Boolean checkIfAvailable(String eventName);
+
+	NetworkExchangeMessageWrapper<ServiceEntity> getByEventId(String eventId);
 }

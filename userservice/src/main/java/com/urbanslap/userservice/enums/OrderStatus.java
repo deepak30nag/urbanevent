@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.urbanslap.orderservice.enums;
+package com.urbanslap.userservice.enums;
 
 /**
  * @author deepu

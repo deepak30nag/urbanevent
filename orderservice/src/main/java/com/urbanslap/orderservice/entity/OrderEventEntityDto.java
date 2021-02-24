@@ -1,11 +1,9 @@
 /**
  * 
  */
-package com.urbanslap.userservice.dto.orderService;
+package com.urbanslap.orderservice.entity;
 
 import java.util.Date;
-
-import com.urbanslap.userservice.enums.OrderStatus;
 
 /**
  * @author deepu
@@ -16,7 +14,7 @@ public class OrderEventEntityDto {
 	String eventId;
 	String orderBy;
 	String currentlyWith;
-	OrderStatus status;
+	String status;
 	Date lastupdatedAt;
 	Date placedAt;
 
@@ -37,7 +35,7 @@ public class OrderEventEntityDto {
 	 * @param lastupdatedAt
 	 * @param placedAt
 	 */
-	public OrderEventEntityDto(String orderid, String eventId, String orderBy, String currentlyWith, OrderStatus status,
+	public OrderEventEntityDto(String orderid, String eventId, String orderBy, String currentlyWith, String status,
 			Date lastupdatedAt, Date placedAt) {
 		super();
 		this.orderid = orderid;
@@ -81,11 +79,11 @@ public class OrderEventEntityDto {
 		this.currentlyWith = currentlyWith;
 	}
 
-	public OrderStatus getStatus() {
+	public String getStatus() {
 		return status;
 	}
 
-	public void setStatus(OrderStatus status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 

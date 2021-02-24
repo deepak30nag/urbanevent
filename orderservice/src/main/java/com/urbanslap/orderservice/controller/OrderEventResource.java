@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.urbanslap.orderservice.entity.OrderEventEntity;
+import com.urbanslap.orderservice.entity.OrderEventEntityDto;
+import com.urbanslap.orderservice.entity.OrderEventEntityDtoConverter;
 import com.urbanslap.orderservice.facade.OrderEventFacade;
 import com.urbanslap.orderservice.messagewrapper.NetworkExchangeMessageWrapper;
 
@@ -56,8 +58,9 @@ public class OrderEventResource {
 
 	@PostMapping("/orders/createOrder")
 	public ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntity>> createOrder(
-			@RequestBody OrderEventEntity orderEvent) {
-		NetworkExchangeMessageWrapper<OrderEventEntity> entity = orderEventFacade.createNewOrderEntry(orderEvent);
+			@RequestBody OrderEventEntityDto orderEvent) {
+		final OrderEventEntity orderEventToUpdate = OrderEventEntityDtoConverter.convertFromDtoToEntity(orderEvent);
+		NetworkExchangeMessageWrapper<OrderEventEntity> entity = orderEventFacade.createNewOrderEntry(orderEventToUpdate);
 		if (Objects.nonNull(entity.getPayload())) {
 			return new ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntity>>(entity, HttpStatus.CREATED);
 		}
@@ -67,8 +70,9 @@ public class OrderEventResource {
 
 	@PutMapping("/orders/updateOrder/{orderId}")
 	public ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntity>> updateOrder(
-			@RequestBody OrderEventEntity orderEvent, @PathVariable(value = "orderId") String orderId) {
-		NetworkExchangeMessageWrapper<OrderEventEntity> entity = orderEventFacade.updateOrderEntry(orderEvent, orderId);
+			@RequestBody OrderEventEntityDto orderEvent, @PathVariable(value = "orderId") String orderId) {
+		final OrderEventEntity orderEventToUpdate = OrderEventEntityDtoConverter.convertFromDtoToEntity(orderEvent);
+		NetworkExchangeMessageWrapper<OrderEventEntity> entity = orderEventFacade.updateOrderEntry(orderEventToUpdate, orderId);
 		if (Objects.nonNull(entity.getPayload())) {
 			return new ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntity>>(entity, HttpStatus.OK);
 		}

@@ -18,6 +18,7 @@ public class GatewayRoutesConfiguration {
 	@Bean
 	public RouteLocator getGatewayLocator(RouteLocatorBuilder builder)
 	{
-		return builder.routes().build();
+		return builder.routes()
+				.build();
 	}
 }

@@ -38,4 +38,33 @@ public class ServiceProviderFacadeImpl implements ServiceProviderFacade {
 		return serviceProviderRelations;
 		
 	}
+	
+	@Override
+	public NetworkExchangeMessageWrapper<List<ServiceProviderEntity>> getServiceProviderRelationsByLocation(String locationId){
+		NetworkExchangeMessageWrapper<List<ServiceProviderEntity>> serviceProviderRelations = new NetworkExchangeMessageWrapper<List<ServiceProviderEntity>>();
+		serviceProviderRelations.setPayload(serviceProviderDao.getAllServiceProviderRelationsByLocationId(locationId));
+		if(Objects.nonNull(serviceProviderRelations.getPayload()) && serviceProviderRelations.getPayload().size() > 0) {
+			serviceProviderRelations.setStatus(0);
+			serviceProviderRelations.setMessage("Success");
+		} else {
+			serviceProviderRelations.setStatus(1);
+			serviceProviderRelations.setMessage("Failure");			
+		}
+		return serviceProviderRelations;		
+	}
+	
+	@Override
+	public NetworkExchangeMessageWrapper<List<ServiceProviderEntity>> getServiceProviderRelationsByLocationAndServiceId(String locationId, String serviceId){
+		NetworkExchangeMessageWrapper<List<ServiceProviderEntity>> serviceProviderRelations = new NetworkExchangeMessageWrapper<List<ServiceProviderEntity>>();
+		serviceProviderRelations.setPayload(serviceProviderDao.getAllServiceProviderRelationsByLocationIdAndServiceId(locationId,serviceId));
+		if(Objects.nonNull(serviceProviderRelations.getPayload()) && serviceProviderRelations.getPayload().size() > 0) {
+			serviceProviderRelations.setStatus(0);
+			serviceProviderRelations.setMessage("Success");
+		} else {
+			serviceProviderRelations.setStatus(1);
+			serviceProviderRelations.setMessage("Failure");			
+		}
+		return serviceProviderRelations;		
+	}
+	
 }

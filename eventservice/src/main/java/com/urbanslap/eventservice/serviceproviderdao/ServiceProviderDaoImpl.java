@@ -38,5 +38,33 @@ public class ServiceProviderDaoImpl implements ServiceProviderDao {
 				? serviceProviders.values().stream().collect(Collectors.toList())
 				: null;
 	}
+	
+	@Override
+	public List<ServiceProviderEntity> getAllServiceProviderRelationsByLocationId(String locationId){
+		if((Objects.isNull(locationId) || locationId.length() == 0)){
+			return null;
+		}
+		if(Objects.nonNull(serviceProviders) && serviceProviders.size() > 0) {
+			return serviceProviders.values().stream()
+					.filter(serviceProvider -> locationId.equals(serviceProvider.getLocationId()))
+					.collect(Collectors.toList());			
+		}
+		return null;
+	}
+	
+	
+	@Override
+	public List<ServiceProviderEntity> getAllServiceProviderRelationsByLocationIdAndServiceId(String locationId, String serviceId){
+		if((Objects.isNull(serviceId) || serviceId.length() == 0 ) && (Objects.isNull(locationId) || locationId.length() == 0)){
+			return null;
+		}
+		if(Objects.nonNull(serviceProviders) && serviceProviders.size() > 0) {
+			return serviceProviders.values().stream()
+					.filter(serviceProvider -> locationId.equals(serviceProvider.getLocationId()))
+					.filter(serviceProvider -> serviceId.equals(serviceProvider.getServiceId()))
+					.collect(Collectors.toList());			
+		}
+		return null;
+	}
 
 }

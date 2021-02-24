@@ -1,0 +1,59 @@
+/**
+ * 
+ */
+package com.urbanslap.userservice.kafkaEvents;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+
+import com.urbanslap.userservice.dto.orderService.OrderEventEntityDto;
+import com.urbanslap.userservice.enums.OrderStatus;
+import com.urbanslap.userservice.messagewrapper.NetworkExchangeMessageWrapper;
+import com.urbanslap.userservice.restHelper.ProxyHelperClient;
+import com.urbanslap.userservice.rolesfacade.UserRolesFacade;
+import com.urbanslap.userservice.rolesservicedao.UserRolesServiceDao;
+
+/**
+ * @author deepakbisht
+ *
+ */
+@Service
+public class AdminKafkaEventListener {
+	
+	@Autowired
+	UserRolesServiceDao userRolesService;
+	
+	@Autowired
+	ProxyHelperClient client;
+
+	@KafkaListener(topics = "order_req_received", groupId = "order_req_received_group_id")
+	public void newOrderCreatedEventForAdminAsNotification(String orderId) {
+		//update the order with status with admin
+		final String resourceUrl = client.getBaseUrl("order-service") + "/orders/updateOrder/{orderId}";
+		final OrderEventEntityDto entityDto = new OrderEventEntityDto();
+		entityDto.setOrderid(orderId);
+		final String userId = userRolesService.findByRoleName("admin").getId();
+		entityDto.setCurrentlyWith(userId);
+		entityDto.setStatus(OrderStatus.WITH_ADMIN);
+		Map<String,String> urlParams = new HashMap<String,String>();
+		urlParams.put("orderId", orderId);
+		try {
+			final RequestEntity<OrderEventEntityDto> request = new RequestEntity<OrderEventEntityDto>(entityDto,HttpMethod.PUT, new URI(resourceUrl));
+			ResponseEntity<NetworkExchangeMessageWrapper> response = client.restTemplate.exchange(resourceUrl,HttpMethod.PUT, request, NetworkExchangeMessageWrapper.class,urlParams);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+}

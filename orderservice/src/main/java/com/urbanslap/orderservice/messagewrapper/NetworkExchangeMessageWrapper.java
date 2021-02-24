@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @author deepu
  *
  */
-public class NetworkExchangeMessageWrapper<T> implements Serializable {
+public class NetworkExchangeMessageWrapper<T> {
 
 	private static final long serialVersionUID = 5418652324551516563L;
 

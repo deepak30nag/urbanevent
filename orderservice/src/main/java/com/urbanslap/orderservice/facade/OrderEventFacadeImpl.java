@@ -9,16 +9,15 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.urbanslap.orderservice.dao.OrderDao;
 import com.urbanslap.orderservice.entity.OrderEventEntity;
 import com.urbanslap.orderservice.entity.userrole.dto.UserRoles;
 import com.urbanslap.orderservice.messagewrapper.NetworkExchangeMessageWrapper;
+import com.urbanslap.orderservice.restHelper.ProxyHelperClient;
 
 /**
  * @author deepu
@@ -27,14 +26,15 @@ import com.urbanslap.orderservice.messagewrapper.NetworkExchangeMessageWrapper;
 @Component
 public class OrderEventFacadeImpl implements OrderEventFacade {
 
+	private static final String USER_SERVICE = "user-service";
 	@Autowired
 	OrderDao orderDao;
-
+	
 	@Autowired
-	RestTemplate restTemplate;
-
+	ProxyHelperClient client;
+	
 	@Autowired
-	LoadBalancerClient loadBalancerClient;
+	ObjectMapper mapper;
 
 	@Override
 	public NetworkExchangeMessageWrapper<List<OrderEventEntity>> getAllOrderForUserId(String userId) {
@@ -81,27 +81,27 @@ public class OrderEventFacadeImpl implements OrderEventFacade {
 	}
 
 	private String getCurrentlyWith() {
-		String baseUrl = initializer("user-service");
-		String url = baseUrl + "/api/user-service/findByName/role/{roleName}";
+		String baseUrl = client.getBaseUrl(USER_SERVICE);
+		String url = baseUrl + "/api/"+USER_SERVICE+"/findByName/role/{roleName}";
 		Map<String, Object> uriVariables = new HashMap<>();
 		uriVariables.put("roleName", "admin");
-		NetworkExchangeMessageWrapper<UserRoles> roles = null;
+		UserRoles roles = null;
+		ResponseEntity<NetworkExchangeMessageWrapper> responseEntity = null;
 		try {
-			ResponseEntity<NetworkExchangeMessageWrapper> responseEntity = restTemplate.getForEntity(url,
+			responseEntity = client.restTemplate.getForEntity(url,
 					NetworkExchangeMessageWrapper.class, uriVariables);
-			roles = responseEntity.getBody();
+			if(Objects.isNull(responseEntity)) {
+				throw new RuntimeException("No response from user role service");
+			}
+			Map<String,String> map= (Map<String, String>) responseEntity.getBody();
+			roles = mapper.convertValue(map, UserRoles.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (Objects.nonNull(roles) && Objects.nonNull(roles.getPayload())) {
-			return roles.getPayload().getId();
+		if (Objects.nonNull(responseEntity) && Objects.nonNull(responseEntity.getBody()) && Objects.nonNull(responseEntity.getBody().getPayload())) {
+			return roles.getId();
 		}
 		return "001";
-	}
-
-	private String initializer(String applicationName) {
-		ServiceInstance instance = loadBalancerClient.choose(applicationName);
-		return instance.getUri().toString();
 	}
 
 	@Override
@@ -114,6 +114,7 @@ public class OrderEventFacadeImpl implements OrderEventFacade {
 			return messageWrapper;
 		}
 		data.setCurrentlyWith(getCurrentlyWith());
+		
 		final OrderEventEntity orderEntity = orderDao.createNewOrderEntry(data);
 		if (Objects.nonNull(orderEntity)) {
 			messageWrapper.setMessage("Order created: ");

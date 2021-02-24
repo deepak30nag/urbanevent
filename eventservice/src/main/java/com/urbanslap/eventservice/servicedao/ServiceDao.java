@@ -6,4 +6,6 @@ import com.urbanslap.eventservice.entity.ServiceEntity;
 
 public interface ServiceDao {
 	List<ServiceEntity> getAllAvailableService();
+
+	ServiceEntity getById(String id);
 }
