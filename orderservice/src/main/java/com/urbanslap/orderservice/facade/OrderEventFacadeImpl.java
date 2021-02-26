@@ -82,7 +82,7 @@ public class OrderEventFacadeImpl implements OrderEventFacade {
 
 	private String getCurrentlyWith() {
 		String baseUrl = client.getBaseUrl(USER_SERVICE);
-		String url = baseUrl + "/api/"+USER_SERVICE+"/findByName/role/{roleName}";
+		String url = baseUrl + "/"+USER_SERVICE+"/findByName/role/{roleName}";
 		Map<String, Object> uriVariables = new HashMap<>();
 		uriVariables.put("roleName", "admin");
 		UserRoles roles = null;

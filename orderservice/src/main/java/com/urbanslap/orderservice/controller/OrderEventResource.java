@@ -28,7 +28,7 @@ import com.urbanslap.orderservice.messagewrapper.NetworkExchangeMessageWrapper;
  *
  */
 @RestController
-@RequestMapping("/api/order-service")
+@RequestMapping("/order-service")
 public class OrderEventResource {
 
 	@Autowired

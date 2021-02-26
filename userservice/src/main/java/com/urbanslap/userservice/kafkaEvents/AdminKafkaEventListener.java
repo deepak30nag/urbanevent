@@ -35,7 +35,7 @@ public class AdminKafkaEventListener {
 	@Autowired
 	ProxyHelperClient client;
 
-	@KafkaListener(topics = "order_req_received", groupId = "order_req_received_group_id")
+//	@KafkaListener(topics = "order_req_received", groupId = "order_req_received_group_id")
 	public void newOrderCreatedEventForAdminAsNotification(String orderId) {
 		//update the order with status with admin
 		final String resourceUrl = client.getBaseUrl("order-service") + "/orders/updateOrder/{orderId}";

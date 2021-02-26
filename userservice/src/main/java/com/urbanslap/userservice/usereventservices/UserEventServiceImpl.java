@@ -57,7 +57,7 @@ public class UserEventServiceImpl implements UserEventService {
 	public NetworkExchangeMessageWrapper<List<ServiceEntityDto>> getAllAvailableServices() {
 		NetworkExchangeMessageWrapper<List<ServiceEntityDto>> msgWrapper = new NetworkExchangeMessageWrapper<List<ServiceEntityDto>>();
 		final String baseUrl = client.getBaseUrl(EVENT_SERVICE);
-		final String resourceUrl = "/api/" + EVENT_SERVICE + "/allAvailableServices";
+		final String resourceUrl = "/" + EVENT_SERVICE + "/allAvailableServices";
 		ResponseEntity<NetworkExchangeMessageWrapper> responseEntity = null;
 		try {
 			responseEntity = client.restTemplate.getForEntity(baseUrl + resourceUrl,
@@ -93,7 +93,7 @@ public class UserEventServiceImpl implements UserEventService {
 		OrderEventEntityDto entityDto = new OrderEventEntityDto("", entryOrdered.getServiceId(), userId, "", null, null,
 				null);
 		final String baseUrl = client.getBaseUrl(ORDER_SERVICE);
-		final String resourceUrl = baseUrl + "/api/" + ORDER_SERVICE + "/orders/createOrder";
+		final String resourceUrl = baseUrl + "/" + ORDER_SERVICE + "/orders/createOrder";
 		ResponseEntity<NetworkExchangeMessageWrapper> responseEntity = null;
 		try {
 			URI url = new URI(resourceUrl);
@@ -130,7 +130,7 @@ public class UserEventServiceImpl implements UserEventService {
 		UserEntity orderBy = userDaoService.getUserByUserId(orderEntity.getOrderBy());
 		UserEntity currentlyWith = userDaoService.getUserByUserId(orderEntity.getCurrentlyWith());
 		UserRoles currentlyWithRole =userRolesServiceDao.findById(currentlyWith.getRoleId());
-		final String resourceUrl = client.getBaseUrl(EVENT_SERVICE)+ "/api/" + EVENT_SERVICE + "/getById/{eventId}";
+		final String resourceUrl = client.getBaseUrl(EVENT_SERVICE)+ "/" + EVENT_SERVICE + "/getById/{eventId}";
 		Map<String,String> urlParams = new HashMap<>();
 		urlParams.put("eventId", orderEntity.getEventId());
 		ServiceEntityDto service = null;
@@ -206,7 +206,7 @@ public class UserEventServiceImpl implements UserEventService {
 
 	private OrderEventEntityDto getOrderByOrderId(NetworkExchangeMessageWrapper<OrderEventEntityDto> msgWrapper,
 			String orderId) {
-		String resourceUrl = client.getBaseUrl(ORDER_SERVICE) + "/api/" +ORDER_SERVICE+"/orders/findByOrderId/order/{orderId}";
+		String resourceUrl = client.getBaseUrl(ORDER_SERVICE) + "/" +ORDER_SERVICE+"/orders/findByOrderId/order/{orderId}";
 		Map<String,String> urlParams = new HashMap<String,String>();
 		urlParams.put("orderId", orderId);
 		OrderEventEntityDto orderUnderConsideration = null;
@@ -245,7 +245,7 @@ public class UserEventServiceImpl implements UserEventService {
 		final String locationId = orderedBy.getLocationId();
 		final String serviceId = orderToUpdate.getEventId();
 		// poll event service to know if service is available
-		String resourceUrl = client.getBaseUrl(EVENT_SERVICE) + "/api/" +EVENT_SERVICE+"/fetchBylocationAndService/location/{locationId}/service/{serviceId}";
+		String resourceUrl = client.getBaseUrl(EVENT_SERVICE) + "/" +EVENT_SERVICE+"/fetchBylocationAndService/location/{locationId}/service/{serviceId}";
 		Map<String,String> urlParams = new HashMap<>();
 		urlParams.put("serviceId", serviceId);
 		urlParams.put("locationId", locationId);
@@ -284,7 +284,7 @@ public class UserEventServiceImpl implements UserEventService {
 	private void updateOrderWithStatus(OrderEventEntityDto orderToUpdate,NetworkExchangeMessageWrapper<OrderEventEntityDto> msgWrapper) {
 		// update order with status
 		String orderId = orderToUpdate.getOrderid();
-		String resourceUrl = client.getBaseUrl(ORDER_SERVICE) + "/api" +ORDER_SERVICE+"/orders/updateOrder/{orderId}";
+		String resourceUrl = client.getBaseUrl(ORDER_SERVICE) + "/" +ORDER_SERVICE+"/orders/updateOrder/{orderId}";
 		Map<String,String> urlParams = new HashMap<String,String>();
 		urlParams.put("orderId", orderId);
 		OrderEventEntityDto orderupdated = null;

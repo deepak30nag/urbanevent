@@ -25,7 +25,7 @@ import com.urbanslap.userservice.messagewrapper.NetworkExchangeMessageWrapper;
  *
  */
 @RestController
-@RequestMapping("/api/user-service")
+@RequestMapping("/user-service")
 public class UserResource {
 	@Autowired
 	UserFacade userFacade;

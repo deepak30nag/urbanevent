@@ -23,7 +23,7 @@ import com.urbanslap.eventservice.serviceproviderfacade.ServiceProviderFacade;
  *
  */
 @RestController
-@RequestMapping("/api/event-service")
+@RequestMapping("/event-service")
 public class ServiceProviderRelationResource {
 
 	@Autowired

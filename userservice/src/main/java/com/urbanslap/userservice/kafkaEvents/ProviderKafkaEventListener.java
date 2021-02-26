@@ -34,7 +34,7 @@ public class ProviderKafkaEventListener {
 	@Autowired
 	ProxyHelperClient client;
 	
-	@KafkaListener(topics = "order_req_approved", groupId = "order_req_received_group_id")
+//	@KafkaListener(topics = "order_req_approved", groupId = "order_req_received_group_id")
 	public void allApprovedOrdersToOnWait(String orderId) {
 		//update the order with status with admin
 		final String resourceUrl = client.getBaseUrl("order-service") + "/orders/updateOrder/{orderId}";
@@ -55,7 +55,7 @@ public class ProviderKafkaEventListener {
 		}
 	}
 	
-	@KafkaListener(topics = "order_req_approved", groupId = "order_req_received_group_id")
+//	@KafkaListener(topics = "order_req_approved", groupId = "order_req_received_group_id")
 	public void allAcceptedOrdersToComplete(String orderId) {
 		//update the order with status with admin
 		final String resourceUrl = client.getBaseUrl("order-service") + "/orders/updateOrder/{orderId}";

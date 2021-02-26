@@ -16,7 +16,7 @@ import com.urbanslap.eventservice.messagewrapper.NetworkExchangeMessageWrapper;
 import com.urbanslap.eventservice.servicefacades.ServiceFacades;
 
 @RestController
-@RequestMapping("/api/event-service")
+@RequestMapping("/event-service")
 public class EventServiceResouce {
 
 	@Autowired

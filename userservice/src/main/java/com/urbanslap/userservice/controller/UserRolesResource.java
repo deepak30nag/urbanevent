@@ -23,7 +23,7 @@ import com.urbanslap.userservice.rolesfacade.UserRolesFacade;
  *
  */
 @RestController
-@RequestMapping("/api/user-service")
+@RequestMapping("/user-service")
 public class UserRolesResource {
 
 	@Autowired

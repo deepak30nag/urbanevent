@@ -27,7 +27,7 @@ import com.urbanslap.userservice.usereventresource.facades.UserEventFacade;
  *
  */
 @RestController
-@RequestMapping("/api/user-service")
+@RequestMapping("/user-service")
 public class UserEventResource {
 
 	@Autowired
