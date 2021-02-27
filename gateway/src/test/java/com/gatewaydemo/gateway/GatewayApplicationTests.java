@@ -1,10 +1,10 @@
-package com.urbanslap.apigateway;
+package com.gatewaydemo.gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApiGatewayApplicationTests {
+class GatewayApplicationTests {
 
 	@Test
 	void contextLoads() {
