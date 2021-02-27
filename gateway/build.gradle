@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.gatewaydemo'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 sourceCompatibility = '15'
 
 repositories {
@@ -28,7 +28,15 @@ dependencyManagement {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
 }
+jar {
+    archiveBaseName = 'api-gateway'
+    archiveVersion =  '0.0.1'
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.MF'
 
+    manifest {
+        attributes 'Main-Class': 'com.gatewaydemo.gateway.GatewayApplication'
+    }
+}
 test {
 	useJUnitPlatform()
 }

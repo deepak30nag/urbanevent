@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.urbanslap'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 sourceCompatibility = '15'
 
 repositories {
@@ -25,6 +25,15 @@ dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
+}
+jar {
+    archiveBaseName = 'server-discovery'
+    archiveVersion =  '0.0.1'
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.MF'
+
+    manifest {
+        attributes 'Main-Class': 'com.urbanslap.serverdiscovery.ServerdiscoveryApplication'
+    }
 }
 
 test {

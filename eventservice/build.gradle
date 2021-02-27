@@ -24,7 +24,15 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-zipkin', version: '2.2.7.RELEASE'
 }
+jar {
+    archiveBaseName = 'event-service'
+    archiveVersion =  '0.0.1'
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.MF'
 
+    manifest {
+        attributes 'Main-Class': 'com.urbanslap.eventservice.EventserviceApplication'
+    }
+}
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
