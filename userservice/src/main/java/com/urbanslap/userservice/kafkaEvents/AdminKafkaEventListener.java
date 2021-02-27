@@ -12,14 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import com.urbanslap.userservice.dto.orderService.OrderEventEntityDto;
 import com.urbanslap.userservice.enums.OrderStatus;
 import com.urbanslap.userservice.messagewrapper.NetworkExchangeMessageWrapper;
 import com.urbanslap.userservice.restHelper.ProxyHelperClient;
-import com.urbanslap.userservice.rolesfacade.UserRolesFacade;
 import com.urbanslap.userservice.rolesservicedao.UserRolesServiceDao;
 
 /**

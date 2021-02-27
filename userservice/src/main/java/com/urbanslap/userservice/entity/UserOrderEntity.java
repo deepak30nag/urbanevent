@@ -25,15 +25,16 @@ public class UserOrderEntity {
 		this.roleOfCurrentlyWith = roleOfCurrentlyWith;
 	}
 	OrderStatus status;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss a")
 	Date lastUpdatedAt;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss a")
 	Date placedAt;
+	String location;
 	public UserOrderEntity() {
 		super();
 	}
 	public UserOrderEntity(String orderid, String eventName, String orderBy, String currentlyWith, OrderStatus status,
-			Date lastUpdatedAt, Date placedAt,String roleOfCurrentlyWith) {
+			Date lastUpdatedAt, Date placedAt,String roleOfCurrentlyWith,String location) {
 		super();
 		this.orderid = orderid;
 		this.eventName = eventName;
@@ -43,6 +44,7 @@ public class UserOrderEntity {
 		this.lastUpdatedAt = lastUpdatedAt;
 		this.placedAt = placedAt;
 		this.roleOfCurrentlyWith = roleOfCurrentlyWith;
+		this.location = location;
 	}
 	public String getOrderid() {
 		return orderid;
@@ -85,6 +87,12 @@ public class UserOrderEntity {
 	}
 	public void setPlacedAt(Date placedAt) {
 		this.placedAt = placedAt;
+	}
+	public String getLocation() {
+		return location;
+	}
+	public void setLocation(String location) {
+		this.location = location;
 	}
 		
 }
