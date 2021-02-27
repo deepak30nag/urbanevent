@@ -7,10 +7,12 @@ Mainly divided into two services:
 Cross cutting concerns
 1. server registry and discovery
 2. Api Gateway
+3. Zipkin Distributed Tracing
 
 PORT configuration
 1. order service => 8100 onwards
 2. event service => 8200 onwards
 3. user service => 8080 onwards
-4. server registry => 8761
+4. server registry/discovery => 8761
 5. api gateway => 8765
+6. distributing tracing => 9411
