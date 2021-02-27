@@ -42,17 +42,17 @@ public class UserEventResource {
 	}
 
 	@PostMapping("/{userId}/requestForService")
-	public ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntityDto>> placeRequestForService(
+	public ResponseEntity<NetworkExchangeMessageWrapper<UserOrderEntity>> placeRequestForService(
 			@RequestParam("eventName") String eventName, @PathVariable(value = "userId") String userId) {
-		NetworkExchangeMessageWrapper<OrderEventEntityDto> payload = userEventFacade.createOrder(eventName, userId);
-		return new ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntityDto>>(payload, HttpStatus.OK);
+		NetworkExchangeMessageWrapper<UserOrderEntity> payload = userEventFacade.createOrder(eventName, userId);
+		return new ResponseEntity<NetworkExchangeMessageWrapper<UserOrderEntity>>(payload, HttpStatus.OK);
 	}
 
 	@PutMapping("/{userId}/updateOrderRequest")
-	public ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntityDto>> updateOrderRequestForService(
+	public ResponseEntity<NetworkExchangeMessageWrapper<UserOrderEntity>> updateOrderRequestForService(
 			@RequestParam("orderId") String orderId,@RequestParam(value="status",required=false)String status, @PathVariable(value = "userId") String userId) {
-		NetworkExchangeMessageWrapper<OrderEventEntityDto> payload = userEventFacade.updateOrder(orderId, userId,status);
-		return new ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntityDto>>(payload, HttpStatus.OK);
+		NetworkExchangeMessageWrapper<UserOrderEntity> payload = userEventFacade.updateOrder(orderId, userId,status);
+		return new ResponseEntity<NetworkExchangeMessageWrapper<UserOrderEntity>>(payload, HttpStatus.OK);
 	}
 	
 	@GetMapping("/{userId}/allOrders")

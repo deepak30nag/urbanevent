@@ -20,7 +20,6 @@ public class UserEntity {
 	 * Default Constructor
 	 */
 	public UserEntity() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

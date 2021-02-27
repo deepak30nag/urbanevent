@@ -26,7 +26,6 @@ public class ServiceEntityDto {
 	 */
 	public ServiceEntityDto() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public String getServiceId() {

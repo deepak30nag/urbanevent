@@ -81,8 +81,9 @@ public class UserEventServiceImpl implements UserEventService {
 	}
 
 	@Override
-	public NetworkExchangeMessageWrapper<OrderEventEntityDto> createOrder(String eventName, String userId) {
+	public NetworkExchangeMessageWrapper<UserOrderEntity> createOrder(String eventName, String userId) {
 		NetworkExchangeMessageWrapper<OrderEventEntityDto> msgWrapper = new NetworkExchangeMessageWrapper<OrderEventEntityDto>();
+		NetworkExchangeMessageWrapper<UserOrderEntity> msgWrapperUserOrderEntity = new NetworkExchangeMessageWrapper<UserOrderEntity>();
 //		List<ServiceEntityDto> availableServices = getAllAvailableServices().getPayload();
 		List<ServiceEntityDto> availableServices = mapper.convertValue(getAllAvailableServices().getPayload(), new TypeReference<List<ServiceEntityDto>>() {});
 		
@@ -95,9 +96,9 @@ public class UserEventServiceImpl implements UserEventService {
 			}
 		}
 		if (Objects.isNull(entryOrdered)) {
-			msgWrapper.setStatus(1);
-			msgWrapper.setMessage("No such service is available.");
-			return msgWrapper;
+			msgWrapperUserOrderEntity.setStatus(1);
+			msgWrapperUserOrderEntity.setMessage("No such service is available.");
+			return msgWrapperUserOrderEntity;
 		}
 		OrderEventEntityDto entityDto = new OrderEventEntityDto("", entryOrdered.getServiceId(), userId, "", null, null,
 				null);
@@ -110,18 +111,19 @@ public class UserEventServiceImpl implements UserEventService {
 					HttpMethod.POST, url);
 			responseEntity = client.restTemplate.postForEntity(url, request, NetworkExchangeMessageWrapper.class);
 		} catch (URISyntaxException e1) {
-			msgWrapper.setStatus(1);
-			msgWrapper.setMessage(e1.getMessage());
-			msgWrapper.setPayload(null);
+			msgWrapperUserOrderEntity.setStatus(1);
+			msgWrapperUserOrderEntity.setMessage(e1.getMessage());
+			msgWrapperUserOrderEntity.setPayload(null);
 		} catch (Exception e) {
-			msgWrapper.setStatus(1);
-			msgWrapper.setMessage("Failed to create request to order-service");
-			msgWrapper.setPayload(null);
+			msgWrapperUserOrderEntity.setStatus(1);
+			msgWrapperUserOrderEntity.setMessage("Failed to create request to order-service");
+			msgWrapperUserOrderEntity.setPayload(null);
 		}
-		if (Objects.nonNull(responseEntity) && Objects.nonNull(responseEntity.getBody())) {
-			msgWrapper = responseEntity.getBody();
+		if (Objects.nonNull(responseEntity) && Objects.nonNull(responseEntity.getBody()) && Objects.nonNull(responseEntity.getBody().getPayload())) {
+			entityDto = mapper.convertValue(responseEntity.getBody().getPayload(), OrderEventEntityDto.class);
 		}
-		return msgWrapper;
+		msgWrapperUserOrderEntity = getUserOrderEntityForOrderEventEntity(entityDto, entityDto.getOrderid()); 
+		return msgWrapperUserOrderEntity;
 	}
 	
 	@Override
@@ -129,12 +131,18 @@ public class UserEventServiceImpl implements UserEventService {
 		NetworkExchangeMessageWrapper<UserOrderEntity> orderDetailsMsgWrapper= new NetworkExchangeMessageWrapper<UserOrderEntity>();
 		NetworkExchangeMessageWrapper<OrderEventEntityDto> msgWrapper = new NetworkExchangeMessageWrapper<OrderEventEntityDto>();
 		OrderEventEntityDto orderEntity = getOrderByOrderId(msgWrapper, orderId);
+		orderDetailsMsgWrapper = getUserOrderEntityForOrderEventEntity(orderEntity, orderId);
+		return orderDetailsMsgWrapper;
+	}
+	
+	private NetworkExchangeMessageWrapper<UserOrderEntity> getUserOrderEntityForOrderEventEntity(OrderEventEntityDto orderEntity, String orderId){
+		NetworkExchangeMessageWrapper<UserOrderEntity> msgWrapper = new NetworkExchangeMessageWrapper<UserOrderEntity>();
 		UserOrderEntity orderDetails = null;
 		if(Objects.isNull(orderEntity)) {
-			orderDetailsMsgWrapper.setMessage("No order found with order id:"+ orderId);
-			orderDetailsMsgWrapper.setStatus(1);
-			orderDetailsMsgWrapper.setPayload(null);
-			return orderDetailsMsgWrapper;
+			msgWrapper.setMessage("No order found with order id:"+ orderId);
+			msgWrapper.setStatus(1);
+			msgWrapper.setPayload(null);
+			return msgWrapper;
 		}
 		UserEntity orderBy = userDaoService.getUserByUserId(orderEntity.getOrderBy());
 		UserLocationEntity location = userLocationDao.getUserLocationById(orderBy.getLocationId());
@@ -151,28 +159,29 @@ public class UserEventServiceImpl implements UserEventService {
 				service = mapper.convertValue(map, ServiceEntityDto.class);
 			}
 		}catch(RestClientException e) {
-			orderDetailsMsgWrapper.setMessage("error");
-			orderDetailsMsgWrapper.setStatus(1);
-			orderDetailsMsgWrapper.setPayload(null);
-			return orderDetailsMsgWrapper;
+			msgWrapper.setMessage("error");
+			msgWrapper.setStatus(1);
+			msgWrapper.setPayload(null);
+			return msgWrapper;
 		}
 		if(Objects.isNull(service)) {
-			orderDetailsMsgWrapper.setMessage("Failed. Could not find any service with serviceid");
-			orderDetailsMsgWrapper.setStatus(1);
-			orderDetailsMsgWrapper.setPayload(null);
-			return orderDetailsMsgWrapper;
+			msgWrapper.setMessage("Failed. Could not find any service with serviceid");
+			msgWrapper.setStatus(1);
+			msgWrapper.setPayload(null);
+			return msgWrapper;
 		}
 		orderDetails = new UserOrderEntity(orderId, service.getServiceName(), orderBy.getName(), currentlyWith.getName(), orderEntity.getStatus(), orderEntity.getLastupdatedAt(), orderEntity.getPlacedAt(),currentlyWithRole.getName(),location.getLocation());
-		orderDetailsMsgWrapper.setPayload(orderDetails);
-		orderDetailsMsgWrapper.setMessage("Success");
-		orderDetailsMsgWrapper.setStatus(0);
-		return orderDetailsMsgWrapper;
+		msgWrapper.setPayload(orderDetails);
+		msgWrapper.setMessage("Success");
+		msgWrapper.setStatus(0);
+		return msgWrapper;
 	}
 
 	@Override
-	public NetworkExchangeMessageWrapper<OrderEventEntityDto> updateOrder(String orderId, String userId,
+	public NetworkExchangeMessageWrapper<UserOrderEntity> updateOrder(String orderId, String userId,
 			String status) {
 		NetworkExchangeMessageWrapper<OrderEventEntityDto> msgWrapper = new NetworkExchangeMessageWrapper<OrderEventEntityDto>();
+		NetworkExchangeMessageWrapper<UserOrderEntity> msgWrapperUserOrderEntity = new NetworkExchangeMessageWrapper<UserOrderEntity>();
 		final UserRoles userRole = getUserRoleForUser(userId);
 		OrderEventEntityDto dto = new OrderEventEntityDto();
 		dto.setOrderid(orderId);
@@ -184,19 +193,28 @@ public class UserEventServiceImpl implements UserEventService {
 			try{
 				dto.setStatus(OrderStatus.valueOf(status.toUpperCase()));
 			}catch(IllegalArgumentException e) {
-				msgWrapper.setMessage("Such Status is not present. process exited with message: "+e.getMessage());
-				msgWrapper.setStatus(1);
-				msgWrapper.setPayload(null);
-				return msgWrapper;
+				msgWrapperUserOrderEntity.setMessage("Such Status is not present. process exited with message: "+e.getMessage());
+				msgWrapperUserOrderEntity.setStatus(1);
+				msgWrapperUserOrderEntity.setPayload(null);
+				return msgWrapperUserOrderEntity;
 			}
 			dto.setCurrentlyWith(userId);
 			providerUpdationOfOrder(dto,msgWrapper,userRole.getId());
 		} else {
-			msgWrapper.setMessage("");
-			msgWrapper.setStatus(1);
-			msgWrapper.setPayload(null);
+			msgWrapperUserOrderEntity.setMessage("consumer cannot update service once placed");
+			msgWrapperUserOrderEntity.setStatus(1);
+			msgWrapperUserOrderEntity.setPayload(null);
+			return msgWrapperUserOrderEntity;
 		}
-		return msgWrapper;
+		dto = msgWrapper.getPayload();
+		if(Objects.isNull(dto)) {
+			msgWrapperUserOrderEntity.setMessage("consumer cannot update service once placed");
+			msgWrapperUserOrderEntity.setStatus(1);
+			msgWrapperUserOrderEntity.setPayload(null);
+			return msgWrapperUserOrderEntity;
+		}
+		msgWrapperUserOrderEntity = getUserOrderEntityForOrderEventEntity(dto, dto.getOrderid());
+		return msgWrapperUserOrderEntity;
 	}
 
 	private UserRoles getUserRoleForUser(String userId) {
@@ -217,7 +235,7 @@ public class UserEventServiceImpl implements UserEventService {
 		if(!(orderUnderConsideration.getStatus().equals(OrderStatus.ON_WAIT) || (orderUnderConsideration.getStatus().equals(OrderStatus.APPROVED)))) {
 			msgWrapper.setMessage("Failed. Order either already complete or accepted by other provider");
 			msgWrapper.setStatus(1);
-			msgWrapper.setPayload(null);
+			msgWrapper.setPayload(dto);
 			return;
 		}
 		updateOrderWithStatus(dto, msgWrapper);

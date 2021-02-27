@@ -14,7 +14,6 @@ public class UserLocationEntity {
 
 	public UserLocationEntity() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

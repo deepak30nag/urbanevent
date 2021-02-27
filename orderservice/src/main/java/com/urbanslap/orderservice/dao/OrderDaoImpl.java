@@ -89,7 +89,7 @@ public class OrderDaoImpl implements OrderDao {
 			}
 			orderData.setLastupdatedAt(new Date());
 			orderTransactions.put(orderData.getOrderid(), orderData);
-			return data;
+			return orderData;
 		}
 		return null;
 	}

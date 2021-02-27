@@ -19,7 +19,6 @@ public class NetworkExchangeMessageWrapper<T> {
 
 	public NetworkExchangeMessageWrapper() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
