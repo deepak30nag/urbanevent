@@ -1,0 +1,83 @@
+version: "3.9"
+services:
+  zipkin:
+    image: openzipkin/zipkin:latest-amd64
+    container_name: urban-zipkin
+    deploy:
+      replicas: 1
+    ports: 
+      - "9411:9411"
+    networks:
+      - urbanclapmock
+
+  // we only want only 1 instance of eureka server as well
+  eureka:
+    image: d33pu/urban-example:server-discovery
+    container_name: discovery-server
+    deploy:
+      replicas: 1
+    ports:
+      - "8761:8761"
+    networks:
+      - urbanclapmock
+  gateway:
+    image: d33pu/urban-example:api-gateway
+    cotainer_name: api-gateway
+    ports:
+      - "8765:8765"
+    links:
+      - discovery-server:discovery-server
+    networks:
+      - urbanclapmock
+
+  order-service:
+    image: d33pu/urban-example:order-service
+    conatiner_name: order-service
+    ports:
+      - "8100:8100"
+    links:
+      - discovery-server:discovery-server
+    networks:
+      - urbanclapmock
+    depends_on:
+      eureka:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+
+  event-service:
+    image:  d33pu/urban-example:event-service
+    container_name: event-service
+    ports:
+      - "8200:8200"
+    links:
+      - discovery-server:discovery-server
+    networks:
+      - urbanclapmock
+    depends_on:
+      eureka:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+
+  user-service:
+    image: d33pu/urban-example:user-service
+    container_name: user-service
+    ports:
+      - "8080:8080"
+    links:
+      - discovery-server:discovery-server
+    networks:
+      - urbanclapmock
+    depends_on:
+      eureka:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+      event-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+
+networks:
+  urbanclapmock:
