@@ -11,7 +11,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.urbanslap.orderservice.entity.OrderEventEntity;
@@ -23,8 +22,6 @@ import com.urbanslap.orderservice.enums.OrderStatus;
  */
 @Service
 public class OrderDaoImpl implements OrderDao {
-	@Autowired
-	KafkaTemplate<String, String> kafkaTemplate;
 	
 	
 	static Map<String, OrderEventEntity> orderTransactions;
@@ -62,20 +59,19 @@ public class OrderDaoImpl implements OrderDao {
 			return null;
 		}
 		if (orderTransactions.size() <= 9) {
-			data.setOrderid("00" + orderTransactions.size() + 1);
+			data.setOrderid("00" + (orderTransactions.size() + 1));
 		} else if (orderTransactions.size() <= 99) {
-			data.setOrderid("0" + orderTransactions.size() + 1);
+			data.setOrderid("0" + (orderTransactions.size() + 1));
 		} else {
 			data.setOrderid(Integer.valueOf(orderTransactions.size() + 1).toString());
 		}
 		data.setStatus(OrderStatus.PLACED);
-		data.setCurrentlyWith("001");
 		data.setPlacedAt(new Date());
 		data.setLastupdatedAt(new Date());
 		orderTransactions.put(data.getOrderid(), data);
 		//sending message to queue to Topic named "order_req_received" 
 		//this would be listened further by admin.
-		sendKafkaNotification(data.getStatus(), data.getOrderid());
+//		sendKafkaNotification(data.getStatus(), data.getOrderid());
 		return data;
 	}
 
@@ -87,33 +83,28 @@ public class OrderDaoImpl implements OrderDao {
 			}
 			if(Objects.nonNull(data.getStatus()) && notNullAndNotEmpty(data.getStatus().toString())) {
 				if(!data.getStatus().equals(orderData.getStatus())) {
-					sendKafkaNotification(data.getStatus(),data.getOrderid());
+//					sendKafkaNotification(data.getStatus(),data.getOrderid());
 				}
 				orderData.setStatus(data.getStatus());
 			}
 			orderData.setLastupdatedAt(new Date());
 			orderTransactions.put(orderData.getOrderid(), orderData);
-			return data;
+			return orderData;
 		}
 		return null;
 	}
 	
-	private void sendKafkaNotification(OrderStatus status, String orderId) {
-		String TOPIC_NAME="";
-		switch(status) {
-		case PLACED: TOPIC_NAME="order_req_received";
-			kafkaTemplate.send(TOPIC_NAME,orderId);
-			break;
-		case APPROVED: TOPIC_NAME="order_req_approved";
-			kafkaTemplate.send(TOPIC_NAME,orderId);
-			break;
-		case ACCEPTED: TOPIC_NAME="order_req_accepted";
-			kafkaTemplate.send(TOPIC_NAME,orderId);
-			break;
-			default:break;
-		}
-		
-	}
+	/*
+	 * private void sendKafkaNotification(OrderStatus status, String orderId) {
+	 * String TOPIC_NAME=""; switch(status) { case PLACED:
+	 * TOPIC_NAME="order_req_received"; kafkaTemplate.send(TOPIC_NAME,orderId);
+	 * break; case APPROVED: TOPIC_NAME="order_req_approved";
+	 * kafkaTemplate.send(TOPIC_NAME,orderId); break; case ACCEPTED:
+	 * TOPIC_NAME="order_req_accepted"; kafkaTemplate.send(TOPIC_NAME,orderId);
+	 * break; default:break; }
+	 * 
+	 * }
+	 */
 
 	private boolean notNullAndNotEmpty(String value) {
 		return Objects.nonNull(value) && value.length() > 0;

@@ -19,7 +19,6 @@ public class NetworkExchangeMessageWrapper<T> implements Serializable {
 
 	public NetworkExchangeMessageWrapper() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

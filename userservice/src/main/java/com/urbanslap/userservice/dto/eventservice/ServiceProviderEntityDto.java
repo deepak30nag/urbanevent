@@ -18,7 +18,6 @@ public class ServiceProviderEntityDto {
 	 */
 	public ServiceProviderEntityDto() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

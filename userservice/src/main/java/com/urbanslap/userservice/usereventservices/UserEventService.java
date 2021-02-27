@@ -11,9 +11,9 @@ public interface UserEventService {
 
 	NetworkExchangeMessageWrapper<List<ServiceEntityDto>> getAllAvailableServices();
 
-	NetworkExchangeMessageWrapper<OrderEventEntityDto> createOrder(String eventName, String userId);
+	NetworkExchangeMessageWrapper<UserOrderEntity> createOrder(String eventName, String userId);
 
-	NetworkExchangeMessageWrapper<OrderEventEntityDto> updateOrder(String orderId, String userId, String status);
+	NetworkExchangeMessageWrapper<UserOrderEntity> updateOrder(String orderId, String userId, String status);
 
 	NetworkExchangeMessageWrapper<UserOrderEntity> getOrderByOrderIdAndUserId(String orderId, String userId);
 

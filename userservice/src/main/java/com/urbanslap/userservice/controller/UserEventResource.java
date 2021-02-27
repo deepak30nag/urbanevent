@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,7 +28,7 @@ import com.urbanslap.userservice.usereventresource.facades.UserEventFacade;
  *
  */
 @RestController
-@RequestMapping("/user-service")
+@RequestMapping("/user-service/user")
 public class UserEventResource {
 
 	@Autowired
@@ -41,17 +42,17 @@ public class UserEventResource {
 	}
 
 	@PostMapping("/{userId}/requestForService")
-	public ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntityDto>> placeRequestForService(
+	public ResponseEntity<NetworkExchangeMessageWrapper<UserOrderEntity>> placeRequestForService(
 			@RequestParam("eventName") String eventName, @PathVariable(value = "userId") String userId) {
-		NetworkExchangeMessageWrapper<OrderEventEntityDto> payload = userEventFacade.createOrder(eventName, userId);
-		return new ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntityDto>>(payload, HttpStatus.OK);
+		NetworkExchangeMessageWrapper<UserOrderEntity> payload = userEventFacade.createOrder(eventName, userId);
+		return new ResponseEntity<NetworkExchangeMessageWrapper<UserOrderEntity>>(payload, HttpStatus.OK);
 	}
 
-	@PostMapping("/{userId}/updateOrderRequest")
-	public ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntityDto>> updateOrderRequestForService(
+	@PutMapping("/{userId}/updateOrderRequest")
+	public ResponseEntity<NetworkExchangeMessageWrapper<UserOrderEntity>> updateOrderRequestForService(
 			@RequestParam("orderId") String orderId,@RequestParam(value="status",required=false)String status, @PathVariable(value = "userId") String userId) {
-		NetworkExchangeMessageWrapper<OrderEventEntityDto> payload = userEventFacade.updateOrder(orderId, userId,status);
-		return new ResponseEntity<NetworkExchangeMessageWrapper<OrderEventEntityDto>>(payload, HttpStatus.OK);
+		NetworkExchangeMessageWrapper<UserOrderEntity> payload = userEventFacade.updateOrder(orderId, userId,status);
+		return new ResponseEntity<NetworkExchangeMessageWrapper<UserOrderEntity>>(payload, HttpStatus.OK);
 	}
 	
 	@GetMapping("/{userId}/allOrders")

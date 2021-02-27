@@ -85,7 +85,7 @@ public class OrderEventFacadeImpl implements OrderEventFacade {
 		String url = baseUrl + "/"+USER_SERVICE+"/findByName/role/{roleName}";
 		Map<String, Object> uriVariables = new HashMap<>();
 		uriVariables.put("roleName", "admin");
-		UserRoles roles = null;
+		UserRoles role = null;
 		ResponseEntity<NetworkExchangeMessageWrapper> responseEntity = null;
 		try {
 			responseEntity = client.restTemplate.getForEntity(url,
@@ -93,13 +93,15 @@ public class OrderEventFacadeImpl implements OrderEventFacade {
 			if(Objects.isNull(responseEntity)) {
 				throw new RuntimeException("No response from user role service");
 			}
-			Map<String,String> map= (Map<String, String>) responseEntity.getBody();
-			roles = mapper.convertValue(map, UserRoles.class);
+			if(Objects.nonNull(responseEntity) && Objects.nonNull(responseEntity.getBody()) && Objects.nonNull(responseEntity.getBody().getPayload())) {
+				Map<String,String> map= (Map<String, String>) responseEntity.getBody().getPayload();
+				role = mapper.convertValue(map, UserRoles.class);				
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (Objects.nonNull(responseEntity) && Objects.nonNull(responseEntity.getBody()) && Objects.nonNull(responseEntity.getBody().getPayload())) {
-			return roles.getId();
+		if (Objects.nonNull(role)) {
+			return role.getId();
 		}
 		return "001";
 	}

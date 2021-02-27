@@ -25,7 +25,6 @@ public class OrderEventEntity {
 	 */
 	public OrderEventEntity() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

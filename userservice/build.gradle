@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.urbanslap'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = '15'
 
 repositories {
 	mavenCentral()
@@ -22,7 +22,10 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	// https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
-	implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '2.6.6'
+	//implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '2.6.6'
+	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-zipkin
+	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-zipkin', version: '2.2.7.RELEASE'
+	
 	
 }
 

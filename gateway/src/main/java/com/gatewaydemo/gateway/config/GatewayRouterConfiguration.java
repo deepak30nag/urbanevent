@@ -17,6 +17,11 @@ public class GatewayRouterConfiguration {
 
 	@Bean
 	public RouteLocator returnRouterConfig(RouteLocatorBuilder builder) {
-		return builder.routes().route(p-> p.path("/resource/**").uri("lb://api-resource/")).build();
+		return builder.routes()
+				.route(p-> p.path("/resource/**").uri("lb://api-resource/"))
+				.route(p->p.path("/user-service/**").uri("lb://user-service/"))
+				.route(p->p.path("/order-service/**").uri("lb://order-service/"))
+				.route(p->p.path("/event-service/**").uri("lb://event-service/"))
+				.build();
 	}
 }

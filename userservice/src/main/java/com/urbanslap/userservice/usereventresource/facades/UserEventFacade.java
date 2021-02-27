@@ -9,11 +9,11 @@ import com.urbanslap.userservice.messagewrapper.NetworkExchangeMessageWrapper;
 
 public interface UserEventFacade {
 
-	NetworkExchangeMessageWrapper<OrderEventEntityDto> createOrder(String eventName, String userId);
+	NetworkExchangeMessageWrapper<UserOrderEntity> createOrder(String eventName, String userId);
 
 	NetworkExchangeMessageWrapper<List<ServiceEntityDto>> getAllAvailableServices();
 
-	NetworkExchangeMessageWrapper<OrderEventEntityDto> updateOrder(String orderId, String userId, String status);
+	NetworkExchangeMessageWrapper<UserOrderEntity> updateOrder(String orderId, String userId, String status);
 
 	NetworkExchangeMessageWrapper<UserOrderEntity> getOrderByOrderIdAndUserId(String orderId, String userId);
 

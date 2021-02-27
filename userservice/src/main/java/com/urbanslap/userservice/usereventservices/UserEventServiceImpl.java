@@ -18,14 +18,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.urbanslap.userservice.dto.eventservice.ServiceEntityDto;
 import com.urbanslap.userservice.dto.eventservice.ServiceProviderEntityDto;
 import com.urbanslap.userservice.dto.orderService.OrderEventEntityDto;
 import com.urbanslap.userservice.entity.UserEntity;
+import com.urbanslap.userservice.entity.UserLocationEntity;
 import com.urbanslap.userservice.entity.UserOrderEntity;
 import com.urbanslap.userservice.entity.UserRoles;
 import com.urbanslap.userservice.enums.OrderStatus;
+import com.urbanslap.userservice.locationservicedao.UserLocationServiceDao;
 import com.urbanslap.userservice.messagewrapper.NetworkExchangeMessageWrapper;
 import com.urbanslap.userservice.restHelper.ProxyHelperClient;
 import com.urbanslap.userservice.rolesservicedao.UserRolesServiceDao;
@@ -43,6 +47,9 @@ public class UserEventServiceImpl implements UserEventService {
 	
 	@Autowired
 	UserDaoService userDaoService;
+	
+	@Autowired
+	UserLocationServiceDao userLocationDao;
 	
 	@Autowired
 	ProxyHelperClient client;
@@ -74,9 +81,12 @@ public class UserEventServiceImpl implements UserEventService {
 	}
 
 	@Override
-	public NetworkExchangeMessageWrapper<OrderEventEntityDto> createOrder(String eventName, String userId) {
+	public NetworkExchangeMessageWrapper<UserOrderEntity> createOrder(String eventName, String userId) {
 		NetworkExchangeMessageWrapper<OrderEventEntityDto> msgWrapper = new NetworkExchangeMessageWrapper<OrderEventEntityDto>();
-		List<ServiceEntityDto> availableServices = getAllAvailableServices().getPayload();
+		NetworkExchangeMessageWrapper<UserOrderEntity> msgWrapperUserOrderEntity = new NetworkExchangeMessageWrapper<UserOrderEntity>();
+//		List<ServiceEntityDto> availableServices = getAllAvailableServices().getPayload();
+		List<ServiceEntityDto> availableServices = mapper.convertValue(getAllAvailableServices().getPayload(), new TypeReference<List<ServiceEntityDto>>() {});
+		
 		ServiceEntityDto entryOrdered = null;
 		if (Objects.nonNull(availableServices) && availableServices.size() > 0) {
 			Optional<ServiceEntityDto> optionalService = availableServices.stream()
@@ -86,9 +96,9 @@ public class UserEventServiceImpl implements UserEventService {
 			}
 		}
 		if (Objects.isNull(entryOrdered)) {
-			msgWrapper.setStatus(1);
-			msgWrapper.setMessage("No such service is available.");
-			return msgWrapper;
+			msgWrapperUserOrderEntity.setStatus(1);
+			msgWrapperUserOrderEntity.setMessage("No such service is available.");
+			return msgWrapperUserOrderEntity;
 		}
 		OrderEventEntityDto entityDto = new OrderEventEntityDto("", entryOrdered.getServiceId(), userId, "", null, null,
 				null);
@@ -101,18 +111,19 @@ public class UserEventServiceImpl implements UserEventService {
 					HttpMethod.POST, url);
 			responseEntity = client.restTemplate.postForEntity(url, request, NetworkExchangeMessageWrapper.class);
 		} catch (URISyntaxException e1) {
-			msgWrapper.setStatus(1);
-			msgWrapper.setMessage(e1.getMessage());
-			msgWrapper.setPayload(null);
+			msgWrapperUserOrderEntity.setStatus(1);
+			msgWrapperUserOrderEntity.setMessage(e1.getMessage());
+			msgWrapperUserOrderEntity.setPayload(null);
 		} catch (Exception e) {
-			msgWrapper.setStatus(1);
-			msgWrapper.setMessage("Failed to create request to order-service");
-			msgWrapper.setPayload(null);
+			msgWrapperUserOrderEntity.setStatus(1);
+			msgWrapperUserOrderEntity.setMessage("Failed to create request to order-service");
+			msgWrapperUserOrderEntity.setPayload(null);
 		}
-		if (Objects.nonNull(responseEntity.getBody())) {
-			msgWrapper = responseEntity.getBody();
+		if (Objects.nonNull(responseEntity) && Objects.nonNull(responseEntity.getBody()) && Objects.nonNull(responseEntity.getBody().getPayload())) {
+			entityDto = mapper.convertValue(responseEntity.getBody().getPayload(), OrderEventEntityDto.class);
 		}
-		return msgWrapper;
+		msgWrapperUserOrderEntity = getUserOrderEntityForOrderEventEntity(entityDto, entityDto.getOrderid()); 
+		return msgWrapperUserOrderEntity;
 	}
 	
 	@Override
@@ -120,14 +131,21 @@ public class UserEventServiceImpl implements UserEventService {
 		NetworkExchangeMessageWrapper<UserOrderEntity> orderDetailsMsgWrapper= new NetworkExchangeMessageWrapper<UserOrderEntity>();
 		NetworkExchangeMessageWrapper<OrderEventEntityDto> msgWrapper = new NetworkExchangeMessageWrapper<OrderEventEntityDto>();
 		OrderEventEntityDto orderEntity = getOrderByOrderId(msgWrapper, orderId);
+		orderDetailsMsgWrapper = getUserOrderEntityForOrderEventEntity(orderEntity, orderId);
+		return orderDetailsMsgWrapper;
+	}
+	
+	private NetworkExchangeMessageWrapper<UserOrderEntity> getUserOrderEntityForOrderEventEntity(OrderEventEntityDto orderEntity, String orderId){
+		NetworkExchangeMessageWrapper<UserOrderEntity> msgWrapper = new NetworkExchangeMessageWrapper<UserOrderEntity>();
 		UserOrderEntity orderDetails = null;
 		if(Objects.isNull(orderEntity)) {
-			orderDetailsMsgWrapper.setMessage("No order found with order id:"+ orderId);
-			orderDetailsMsgWrapper.setStatus(1);
-			orderDetailsMsgWrapper.setPayload(null);
-			return orderDetailsMsgWrapper;
+			msgWrapper.setMessage("No order found with order id:"+ orderId);
+			msgWrapper.setStatus(1);
+			msgWrapper.setPayload(null);
+			return msgWrapper;
 		}
 		UserEntity orderBy = userDaoService.getUserByUserId(orderEntity.getOrderBy());
+		UserLocationEntity location = userLocationDao.getUserLocationById(orderBy.getLocationId());
 		UserEntity currentlyWith = userDaoService.getUserByUserId(orderEntity.getCurrentlyWith());
 		UserRoles currentlyWithRole =userRolesServiceDao.findById(currentlyWith.getRoleId());
 		final String resourceUrl = client.getBaseUrl(EVENT_SERVICE)+ "/" + EVENT_SERVICE + "/getById/{eventId}";
@@ -141,29 +159,30 @@ public class UserEventServiceImpl implements UserEventService {
 				service = mapper.convertValue(map, ServiceEntityDto.class);
 			}
 		}catch(RestClientException e) {
-			orderDetailsMsgWrapper.setMessage("error");
-			orderDetailsMsgWrapper.setStatus(1);
-			orderDetailsMsgWrapper.setPayload(null);
-			return orderDetailsMsgWrapper;
+			msgWrapper.setMessage("error");
+			msgWrapper.setStatus(1);
+			msgWrapper.setPayload(null);
+			return msgWrapper;
 		}
 		if(Objects.isNull(service)) {
-			orderDetailsMsgWrapper.setMessage("Failed. Could not find any service with serviceid");
-			orderDetailsMsgWrapper.setStatus(1);
-			orderDetailsMsgWrapper.setPayload(null);
-			return orderDetailsMsgWrapper;
+			msgWrapper.setMessage("Failed. Could not find any service with serviceid");
+			msgWrapper.setStatus(1);
+			msgWrapper.setPayload(null);
+			return msgWrapper;
 		}
-		orderDetails = new UserOrderEntity(orderId, service.getServiceName(), orderBy.getName(), currentlyWith.getName(), orderEntity.getStatus(), orderEntity.getLastupdatedAt(), orderEntity.getPlacedAt(),currentlyWithRole.getName());
-		orderDetailsMsgWrapper.setPayload(orderDetails);
-		orderDetailsMsgWrapper.setMessage("Success");
-		orderDetailsMsgWrapper.setStatus(0);
-		return orderDetailsMsgWrapper;
+		orderDetails = new UserOrderEntity(orderId, service.getServiceName(), orderBy.getName(), currentlyWith.getName(), orderEntity.getStatus(), orderEntity.getLastupdatedAt(), orderEntity.getPlacedAt(),currentlyWithRole.getName(),location.getLocation());
+		msgWrapper.setPayload(orderDetails);
+		msgWrapper.setMessage("Success");
+		msgWrapper.setStatus(0);
+		return msgWrapper;
 	}
 
 	@Override
-	public NetworkExchangeMessageWrapper<OrderEventEntityDto> updateOrder(String orderId, String userId,
+	public NetworkExchangeMessageWrapper<UserOrderEntity> updateOrder(String orderId, String userId,
 			String status) {
 		NetworkExchangeMessageWrapper<OrderEventEntityDto> msgWrapper = new NetworkExchangeMessageWrapper<OrderEventEntityDto>();
-		final UserRoles userRole = userRolesServiceDao.findById(userId);
+		NetworkExchangeMessageWrapper<UserOrderEntity> msgWrapperUserOrderEntity = new NetworkExchangeMessageWrapper<UserOrderEntity>();
+		final UserRoles userRole = getUserRoleForUser(userId);
 		OrderEventEntityDto dto = new OrderEventEntityDto();
 		dto.setOrderid(orderId);
 		if (userRole.getName().equalsIgnoreCase("admin")) {
@@ -174,18 +193,36 @@ public class UserEventServiceImpl implements UserEventService {
 			try{
 				dto.setStatus(OrderStatus.valueOf(status.toUpperCase()));
 			}catch(IllegalArgumentException e) {
-				msgWrapper.setMessage("Such Status is not present. process exited with message: "+e.getMessage());
-				msgWrapper.setStatus(1);
-				msgWrapper.setPayload(null);
-				return msgWrapper;
+				msgWrapperUserOrderEntity.setMessage("Such Status is not present. process exited with message: "+e.getMessage());
+				msgWrapperUserOrderEntity.setStatus(1);
+				msgWrapperUserOrderEntity.setPayload(null);
+				return msgWrapperUserOrderEntity;
 			}
+			dto.setCurrentlyWith(userId);
 			providerUpdationOfOrder(dto,msgWrapper,userRole.getId());
 		} else {
-			msgWrapper.setMessage("");
-			msgWrapper.setStatus(1);
-			msgWrapper.setPayload(null);
+			msgWrapperUserOrderEntity.setMessage("consumer cannot update service once placed");
+			msgWrapperUserOrderEntity.setStatus(1);
+			msgWrapperUserOrderEntity.setPayload(null);
+			return msgWrapperUserOrderEntity;
 		}
-		return msgWrapper;
+		dto = msgWrapper.getPayload();
+		if(Objects.isNull(dto)) {
+			msgWrapperUserOrderEntity.setMessage("consumer cannot update service once placed");
+			msgWrapperUserOrderEntity.setStatus(1);
+			msgWrapperUserOrderEntity.setPayload(null);
+			return msgWrapperUserOrderEntity;
+		}
+		msgWrapperUserOrderEntity = getUserOrderEntityForOrderEventEntity(dto, dto.getOrderid());
+		return msgWrapperUserOrderEntity;
+	}
+
+	private UserRoles getUserRoleForUser(String userId) {
+		UserEntity userEntity = userDaoService.getUserByUserId(userId);
+		if(Objects.nonNull(userEntity)) {
+			return userRolesServiceDao.findById(userEntity.getRoleId());
+		}
+		return null;
 	}
 
 	private void providerUpdationOfOrder(OrderEventEntityDto dto,
@@ -195,10 +232,10 @@ public class UserEventServiceImpl implements UserEventService {
 		if(Objects.isNull(orderUnderConsideration)) {
 			return;
 		}
-		if(!orderUnderConsideration.getStatus().equals(OrderStatus.ON_WAIT)) {
+		if(!(orderUnderConsideration.getStatus().equals(OrderStatus.ON_WAIT) || (orderUnderConsideration.getStatus().equals(OrderStatus.APPROVED)))) {
 			msgWrapper.setMessage("Failed. Order either already complete or accepted by other provider");
 			msgWrapper.setStatus(1);
-			msgWrapper.setPayload(null);
+			msgWrapper.setPayload(dto);
 			return;
 		}
 		updateOrderWithStatus(dto, msgWrapper);
@@ -252,8 +289,8 @@ public class UserEventServiceImpl implements UserEventService {
 		List<ServiceProviderEntityDto> serviceDtoList = null;
 		try {
 			ResponseEntity<NetworkExchangeMessageWrapper> response = client.restTemplate.getForEntity(resourceUrl, NetworkExchangeMessageWrapper.class,urlParams);
-			if(Objects.nonNull(response) && Objects.nonNull(response.getBody())) {
-				serviceDtoList = (List<ServiceProviderEntityDto>) response.getBody().getPayload();
+			if(Objects.nonNull(response) && Objects.nonNull(response.getBody()) && Objects.nonNull(response.getBody().getPayload())) {
+				serviceDtoList = mapper.convertValue(getAllAvailableServices().getPayload(), new TypeReference<List<ServiceProviderEntityDto>>() {});				
 				if(Objects.isNull(serviceDtoList) && serviceDtoList.size() == 0){
 					msgWrapper.setMessage("Order Rejected. No Such Service available at users location");
 					orderToUpdate.setStatus(OrderStatus.REJECTED_BY_ADMIN);
@@ -284,14 +321,14 @@ public class UserEventServiceImpl implements UserEventService {
 	private void updateOrderWithStatus(OrderEventEntityDto orderToUpdate,NetworkExchangeMessageWrapper<OrderEventEntityDto> msgWrapper) {
 		// update order with status
 		String orderId = orderToUpdate.getOrderid();
-		String resourceUrl = client.getBaseUrl(ORDER_SERVICE) + "/" +ORDER_SERVICE+"/orders/updateOrder/{orderId}";
-		Map<String,String> urlParams = new HashMap<String,String>();
-		urlParams.put("orderId", orderId);
+		String resourceUrl = client.getBaseUrl(ORDER_SERVICE) + "/" +ORDER_SERVICE+"/orders/updateOrder/"+orderId;
 		OrderEventEntityDto orderupdated = null;
 		try {
 			RequestEntity<OrderEventEntityDto> request = new RequestEntity<OrderEventEntityDto>(orderToUpdate, HttpMethod.PUT, new URI(resourceUrl));
-			ResponseEntity<NetworkExchangeMessageWrapper> response = client.restTemplate.exchange(resourceUrl, HttpMethod.PUT, request, NetworkExchangeMessageWrapper.class, urlParams);
-			orderupdated = (OrderEventEntityDto) response.getBody().getPayload();
+			ResponseEntity<NetworkExchangeMessageWrapper> response = client.restTemplate.exchange(resourceUrl, HttpMethod.PUT, request, NetworkExchangeMessageWrapper.class);
+			if(Objects.nonNull(response) && Objects.nonNull(response.getBody()) && Objects.nonNull(response.getBody().getPayload())) {
+				orderupdated = mapper.convertValue(response.getBody().getPayload(), OrderEventEntityDto.class);
+			}
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 			msgWrapper.setMessage("Failed To Update Order with status: "+orderToUpdate.getStatus()+" Process Ended with error: "+ e.getMessage());
@@ -303,9 +340,14 @@ public class UserEventServiceImpl implements UserEventService {
 			msgWrapper.setStatus(1);
 			msgWrapper.setPayload(null);
 		}
+		if(Objects.isNull(orderupdated)) {
+			msgWrapper.setMessage("Failed To Update Order with status: "+orderToUpdate.getStatus());
+			msgWrapper.setStatus(1);
+			msgWrapper.setPayload(null);
+			return;
+		}
 		msgWrapper.setPayload(orderupdated);
 		msgWrapper.setMessage("Update Order with status: "+orderupdated.getStatus());
-		msgWrapper.setStatus(0);
-		
+		msgWrapper.setStatus(0);		
 	}
 }

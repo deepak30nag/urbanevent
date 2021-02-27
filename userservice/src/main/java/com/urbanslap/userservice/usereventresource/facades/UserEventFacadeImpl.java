@@ -42,14 +42,14 @@ public class UserEventFacadeImpl implements UserEventFacade {
 	}
 
 	@Override
-	public NetworkExchangeMessageWrapper<OrderEventEntityDto> createOrder(String eventName, String userId) {
-		NetworkExchangeMessageWrapper<OrderEventEntityDto> msgWrapper = userEventService.createOrder(eventName, userId);		
+	public NetworkExchangeMessageWrapper<UserOrderEntity> createOrder(String eventName, String userId) {
+		NetworkExchangeMessageWrapper<UserOrderEntity> msgWrapper = userEventService.createOrder(eventName, userId);		
 		return msgWrapper;
 	}
 	
 	@Override
-	public NetworkExchangeMessageWrapper<OrderEventEntityDto> updateOrder(String orderId, String userId, String status) {
-		NetworkExchangeMessageWrapper<OrderEventEntityDto> msgWrapper = userEventService.updateOrder(orderId, userId, status);		
+	public NetworkExchangeMessageWrapper<UserOrderEntity> updateOrder(String orderId, String userId, String status) {
+		NetworkExchangeMessageWrapper<UserOrderEntity> msgWrapper = userEventService.updateOrder(orderId, userId, status);		
 		return msgWrapper;
 	}
 	

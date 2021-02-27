@@ -26,7 +26,6 @@ public class UserRoles {
 	 */
 	public UserRoles() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public String getId() {
