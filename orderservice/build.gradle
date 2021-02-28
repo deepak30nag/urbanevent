@@ -21,8 +21,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	// https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
-	//implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '2.6.6'
 	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-zipkin', version: '2.2.7.RELEASE'
 	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
