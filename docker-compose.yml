@@ -25,48 +25,49 @@ services:
     container_name: api-gateway
     ports:
       - "8765:8765"
-    links:
-      - eureka-server:eureka-server
     networks:
       - urbanclapmock
+    depends_on:
+      - eureka-server
     environment:
       - EUREKA_URI=http://eureka-server:8761/eureka
+      - ZIPKIN_URI=http://zipkin:9411/
 
   order-service:
-    image: d33pu/orderservice:v1.0
+    image: d33pu/orderservice:v1.1
     container_name: order-service
     ports:
       - "8100:8100"
-    links:
-      - eureka-server:eureka-server
     networks:
       - urbanclapmock
+    depends_on:
+      - eureka-server
     environment:
       - EUREKA_URI=http://eureka-server:8761/eureka
-
+      - ZIPKIN_URI=http://zipkin:9411/
   event-service:
-    image: d33pu/eventservice:v1.0
+    image: d33pu/eventservice:v1.1
     container_name: event-service
     ports:
       - "8200:8200"
-    links:
-      - eureka-server:eureka-server
     networks:
       - urbanclapmock
+    depends_on:
+      - eureka-server
     environment:
       - EUREKA_URI=http://eureka-server:8761/eureka
-
+      - ZIPKIN_URI=http://zipkin:9411/
   user-service:
-    image: d33pu/userservice:v1.0
+    image: d33pu/userservice:v1.1
     container_name: user-service
     ports:
       - "8080:8080"
-    links:
-      - eureka-server:eureka-server
     networks:
       - urbanclapmock
+    depends_on:
+      - eureka-server
     environment:
       - EUREKA_URI=http://eureka-server:8761/eureka
-
+      - ZIPKIN_URI=http://zipkin:9411/
 networks:
   urbanclapmock:
