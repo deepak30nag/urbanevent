@@ -1,0 +1,72 @@
+version: "3"
+services:
+  zipkin:
+    image: openzipkin/zipkin-slim:latest
+    container_name: urban-zipkin
+    deploy:
+      replicas: 1
+    ports:
+      - "9411:9411"
+    networks:
+      - urbanclapmock
+
+  eureka-server:
+    image: d33pu/serverdiscovery:v1.0
+    container_name: eureka-server
+    deploy:
+      replicas: 1
+    ports:
+      - "8761:8761"
+    networks:
+      - urbanclapmock
+
+  gateway:
+    image: d33pu/gateway:v1.1
+    container_name: api-gateway
+    ports:
+      - "8765:8765"
+    links:
+      - eureka-server:eureka-server
+    networks:
+      - urbanclapmock
+    environment:
+      - EUREKA_URI=http://eureka-server:8761/eureka
+
+  order-service:
+    image: d33pu/orderservice:v1.0
+    container_name: order-service
+    ports:
+      - "8100:8100"
+    links:
+      - eureka-server:eureka-server
+    networks:
+      - urbanclapmock
+    environment:
+      - EUREKA_URI=http://eureka-server:8761/eureka
+
+  event-service:
+    image: d33pu/eventservice:v1.0
+    container_name: event-service
+    ports:
+      - "8200:8200"
+    links:
+      - eureka-server:eureka-server
+    networks:
+      - urbanclapmock
+    environment:
+      - EUREKA_URI=http://eureka-server:8761/eureka
+
+  user-service:
+    image: d33pu/userservice:v1.0
+    container_name: user-service
+    ports:
+      - "8080:8080"
+    links:
+      - eureka-server:eureka-server
+    networks:
+      - urbanclapmock
+    environment:
+      - EUREKA_URI=http://eureka-server:8761/eureka
+
+networks:
+  urbanclapmock:
